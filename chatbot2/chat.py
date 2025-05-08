@@ -8,22 +8,27 @@ pregunta = input()
 
 
 while pregunta != "salir":
+
+      preguntaEsta = False
       with open('preguntas.csv', mode ='r') as archivo:
-            csvFile = csv.DictReader(archivo)
+            archivoCsv = csv.DictReader(archivo)
 
-            preguntaEsta = False
-            for filas in csvFile:
-                  if (pregunta == filas["pregunta"]):
-                        print(filas["respuesta"])
+            for fila in archivoCsv:
+                  if (pregunta == fila["pregunta"]):
+                        print(fila["respuesta"])
                         preguntaEsta = True
-            if preguntaEsta == False:
-                  print("No tengo la respuesta a esa pregunta! Me la anoto para la proxima vez.")
-                  # writer = csv.writer(archivo)
-                  # writer.writerow([pregunta, "No tengo la respuesta a esa pregunta!"])
+                        break
+      
+      if preguntaEsta == False:
+      
+            print("No tengo la respuesta a esa pregunta! Me la anoto para la proxima vez.")
+            with open('preguntas.csv', mode='a') as archivo:
 
+                  writer = csv.writer(archivo)
+                  writer.writerow([pregunta, "Aun no tengo la respuesta a esta pregunta pero estamos trabajando en eso."])
 
-            print("¿En que puedo ayudarte? Si queres salir, solo di 'salir'")
-            pregunta = input()
+      print("¿En que puedo ayudarte? Si queres salir, solo di 'salir'")
+      pregunta = input()
            
 
 print("Gracias por usar el chatbot! Hasta luego!")
