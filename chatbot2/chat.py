@@ -11,7 +11,7 @@ while pregunta != "salir":
 
       preguntaEsta = False
 
-      with open('preguntas.csv', mode ='a+') as archivo: #Abrir el archivo
+      with open('preguntas.csv', mode ='a+') as archivo: #Abrir el archivo para leer y escribir a la vez
 
             archivo.seek(0)
             archivoCsv = csv.DictReader(archivo) #Esto convierte el archivo csv a un diccionario (un json mas o menos)
@@ -21,9 +21,13 @@ while pregunta != "salir":
                   if (pregunta == fila["pregunta"]):
                         print(fila["respuesta"])
                         preguntaEsta = True
-                        break
+                        break #si se encuentra no hace falta seguir buscando
+
+            #si no se encontro la pregunta...      
             if preguntaEsta==False:
+
                   print("No tengo la respuesta a esa pregunta! Me la anoto para la proxima vez.")
+                  
                   writer = csv.writer(archivo)
                   writer.writerow([pregunta, "Aun no tengo la respuesta a esta pregunta pero estamos trabajando en eso."]) #escribir la pregunta en el archivo
 
