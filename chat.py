@@ -91,8 +91,11 @@ def guardar_pregunta_no_respondida(pregunta, directorio_csv, archivo='Preguntas 
 
 # Flujo principal
 def chatbot(directorio_csv):
+    print("Cargando datos...")
     datos = cargar_datos_csv(directorio_csv)
+    os.system('cls')
     print("Chatbot listo. Escribe 'salir' para terminar.")
+    print("Chatbot: Hola! Soy un chatbot, puedes hacerme preguntas sobre las siguientes categorias: Pokemon, Programacion.")
 
     while True:
         pregunta_usuario = input("Tú: ")
