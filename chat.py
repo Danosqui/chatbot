@@ -82,33 +82,8 @@ def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral=70):
     else:
         return None, None, mejor_similitud
 
-# Función para guardar preguntas no respondidas
-def guardar_pregunta_no_respondida(pregunta, directorio_csv, archivo='Preguntas sin poder responder.csv'):
-    ruta_archivo = os.path.join(directorio_csv, archivo)
-    with open(ruta_archivo, 'a', encoding='utf-8', newline='') as f:
-        escritor = csv.writer(f)
-        escritor.writerow([pregunta])
-
-# Flujo principal
-def chatbot(directorio_csv):
+# Función principal del chatbot
+def procesar_pregunta(pregunta, directorio_csv):
     datos = cargar_datos_csv(directorio_csv)
-    print("Chatbot listo. Escribe 'salir' para terminar.")
-
-    while True:
-        pregunta_usuario = input("Tú: ")
-        if pregunta_usuario.lower() == 'salir':
-            print("Chatbot: ¡Adiós!")
-            break
-
-        respuesta, categoria, similitud = buscar_pregunta_mas_similar(pregunta_usuario, datos)
-
-        if respuesta:
-            print(f"Chatbot ({categoria}): {respuesta} (Similitud: {similitud:.2f}%)")
-        else:
-            print("Chatbot: Lo siento, no entiendo tu pregunta.")
-            guardar_pregunta_no_respondida(pregunta_usuario, directorio_csv)
-
-# Ejecutar el chatbot
-if __name__ == "__main__":
-    directorio_csv = "CSVs"
-    chatbot(directorio_csv)
+    respuesta, categoria, similitud = buscar_pregunta_mas_similar(pregunta, datos)
+    return respuesta, categoria, similitud
