@@ -1,5 +1,6 @@
 import os
 import csv
+import json
 import random
 from rapidfuzz import fuzz
 import spacy
@@ -20,18 +21,41 @@ def lematizar_texto(texto):
 
 # Función para leer múltiples archivos CSV y extraer preguntas, respuestas y categorías
 def cargar_datos_csv(directorio):
+
     datos = []
     for archivo in os.listdir(directorio):
-        if archivo.endswith('.csv') and archivo != 'Preguntas sin poder responder.csv':  # Ignorar el archivo de preguntas no respondidas
+
+        if archivo != 'Preguntas sin poder responder.csv':  # Ignorar el archivo de preguntas no respondidas
+        
             ruta = os.path.join(directorio, archivo)
             with open(ruta, 'r', encoding='utf-8') as f:
-                lector = csv.reader(f)
-                filas = [fila for fila in lector if fila]  # Filtrar filas vacías
+
+                filas = []
+                if (archivo.endswith('.csv')):
+                    lector = csv.reader(f)
+                    filas = [fila for fila in lector if fila]  # Filtrar filas vacías
+                    
+                    
+                elif (archivo.endswith('.json')):
+                    lector = json.load(f)
+                    
+                    filas.append([lector[0]["categoria"]])
+                    for fila in lector[1:]:
+                        filas.append([fila["pregunta"],fila["respuesta"]])
+                    #filas = [[fila["pregunta"], fila["respuesta"]] for fila[1:] in lector]
+                    #filas.insert(f)
+                
+        
                 if filas and len(filas[0]) > 0:  # Verificar que haya contenido en la primera fila
+        
                     categoria = filas[0][0].strip()  # Primera línea como categoría
+        
                     if categoria:  # Ignorar archivos con categoría vacía
-                        for fila in filas[1:]:  # Saltar la primera línea
+        
+                        for fila in filas[1:]:  # recorrer las filas salteando la primera
+        
                             if len(fila) >= 2:  # Asegurarse de que haya pregunta y respuesta
+        
                                 pregunta, respuesta = fila[0], fila[1]
                                 datos.append({
                                     'categoria': categoria,
@@ -91,11 +115,12 @@ def guardar_pregunta_no_respondida(pregunta, directorio_csv, archivo='Preguntas 
 
 # Flujo principal
 def chatbot(directorio_csv):
+    
     print("Cargando datos...")
     datos = cargar_datos_csv(directorio_csv)
-    os.system('cls')
+    #os.system('cls')
     print("Chatbot listo. Escribe 'salir' para terminar.")
-    print("Chatbot: Hola! Soy un chatbot, puedes hacerme preguntas sobre las siguientes categorias: Pokemon, Programacion.")
+    print("Chatbot: Hola! Soy un chatbot, puedes hacerme preguntas sobre las siguientes categorias: Pokemon, Programacion y Archivos.")
 
     while True:
         pregunta_usuario = input("Tú: ")
