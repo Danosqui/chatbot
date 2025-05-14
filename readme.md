@@ -142,10 +142,16 @@ Consulta la documentación completa en el siguiente enlace:
 ## Changelog
 b indica que pertenece a la version Development de el proyecto
 ```
-8 de mayo de 2025 - Creación del chatbot V0.1
-11 de mayo de 2025 - Implementación de RapidFuzz y spaCy V1.0
-11 de mayo de 2025 - Implementación de interfaz gráfica V1.0b
-13 de mayo de 2025 - Mejora en la GUI e implementación de un config.json, animación de carga mejorada y manejo dinámico del historial, procesamiento de preguntas y animación en paralelo 1.1b
+8 de mayo de 2025 0.1
+• Creación del chatbot
+11 de mayo de 2025 1.0
+• Implementación de RapidFuzz y spaCy
+11 de mayo de 2025 1.0b
+• Implementación de interfaz gráfica
+13 de mayo de 2025 1.1b
+• Mejora en la GUI e implementación de un config.json
+• animación de carga mejorada y manejo dinámico del historial
+• procesamiento de preguntas y animación en paralelo
 ```
 
 ## Instalación alternativa con npm
