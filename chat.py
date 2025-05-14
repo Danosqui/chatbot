@@ -8,6 +8,11 @@ import unicodedata
 # Cargar el modelo de spaCy para español
 nlp = spacy.load("es_core_news_sm")
 
+# Lista de palabras vacías comunes en español
+PALABRAS_VACIAS = {
+    "que", "es", "una", "un", "el", "la", "los", "las", "para", "de", "en", "y", "a", "por", "con", "al", "del", "se", "lo", "su", "sus", "o", "u"
+}
+
 # Función para normalizar texto (eliminar tildes y convertir a minúsculas)
 def normalizar_texto(texto):
     texto = unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('utf-8')
@@ -17,6 +22,10 @@ def normalizar_texto(texto):
 def lematizar_texto(texto):
     doc = nlp(texto)
     return ' '.join([token.lemma_ for token in doc])
+
+# Función para quitar palabras vacías de un texto
+def quitar_palabras_vacias(texto):
+    return ' '.join([palabra for palabra in texto.split() if palabra not in PALABRAS_VACIAS])
 
 # Función para leer múltiples archivos CSV y extraer preguntas, respuestas y categorías
 def cargar_datos_csv(directorio):
@@ -37,14 +46,14 @@ def cargar_datos_csv(directorio):
                                     'categoria': categoria,
                                     'pregunta': pregunta,
                                     'respuesta': respuesta,
-                                    'categoria_lematizada': normalizar_texto(lematizar_texto(categoria)),
-                                    'pregunta_lematizada': normalizar_texto(lematizar_texto(pregunta))
+                                    'categoria_lematizada': quitar_palabras_vacias(normalizar_texto(lematizar_texto(categoria))),
+                                    'pregunta_lematizada': quitar_palabras_vacias(normalizar_texto(lematizar_texto(pregunta)))
                                 })
     return datos
 
 # Función para buscar la pregunta más similar o interpretar la categoría
-def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral=70):
-    pregunta_usuario_lematizada = normalizar_texto(lematizar_texto(pregunta_usuario))
+def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral=50):
+    pregunta_usuario_lematizada = quitar_palabras_vacias(normalizar_texto(lematizar_texto(pregunta_usuario)))
     mejor_similitud = 0
     mejor_respuesta = None
     mejor_categoria = None
@@ -56,6 +65,15 @@ def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral=70):
         entradas_categoria = [entrada for entrada in datos if entrada['categoria_lematizada'] == categoria]
         ejemplos = random.sample([entrada['pregunta'] for entrada in entradas_categoria], min(3, len(entradas_categoria)))
         return f"En la categoría '{categoria.capitalize()}' hay {len(entradas_categoria)} entradas! Entre ellas: {', '.join(ejemplos)}", categoria.capitalize(), 100
+
+    # --- NUEVO: búsqueda por palabra clave si la entrada es corta ---
+    palabras_usuario = pregunta_usuario_lematizada.split()
+    if len(palabras_usuario) == 1:
+        palabra = palabras_usuario[0]
+        for entrada in datos:
+            if palabra in entrada['pregunta_lematizada'].split():
+                # Devuelve la primera coincidencia fuerte
+                return entrada['respuesta'], entrada['categoria'], 100
 
     # Buscar coincidencias con las preguntas dentro de la categoría específica (si se menciona)
     for entrada in datos:
