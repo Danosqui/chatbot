@@ -1,186 +1,211 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-from chat import procesar_pregunta  # Importamos la función procesar_pregunta desde chat.py
-import os
-import time
-import threading
+import flet as ft
 import json
+import threading
+import time
+from chat import procesar_pregunta
 
 # Cargar configuraciones desde config.json
-with open("config.json", "r") as config_file:
-    config = json.load(config_file)
+def cargar_config():
+    with open("config.json", "r") as config_file:
+        return json.load(config_file)
 
-# Ruta absoluta a la carpeta CSVs
-directorio_csv = config["chatbot"]["csv_directory"]
+config = cargar_config()
 
-# Configuración de delay, animación y resolución
-loading_delay = config["interface"]["loading_delay"]  # Tiempo entre "." y ".."
-completion_delay = config["interface"]["completion_delay"]  # Tiempo antes de borrar "Cargando completado."
-loading_animation_enabled = config["interface"]["loading_animation"]
-loading_cycles = config["interface"]["loading_cycles"]  # Cantidad de ciclos de "Cargando..."
-resolution = config["interface"]["resolution"]  # Resolución de la ventana
+# Globales desde config
+def aplicar_config():
+    global directorio_csv, loading_delay, completion_delay, loading_animation_enabled, loading_cycles, resolution, default_mode
+    directorio_csv = config["chatbot"]["csv_directory"]
+    loading_delay = config["interface"]["loading_delay"]
+    completion_delay = config["interface"]["completion_delay"]
+    loading_animation_enabled = config["interface"]["loading_animation"]
+    loading_cycles = config["interface"]["loading_cycles"]
+    resolution = config["interface"]["resolution"]
+    default_mode = config["interface"]["default_mode"]
+
+aplicar_config()
 
 # Colores para los modos
 MODOS = {
     "claro": {
         "bg": "#ffffff",
         "fg": "#000000",
-        "entry_bg": "#f0f0f0",
-        "entry_fg": "#000000",
-        "button_bg": "#e0e0e0",
-        "button_fg": "#000000",
     },
     "oscuro": {
         "bg": "#2e2e2e",
         "fg": "#ffffff",
-        "entry_bg": "#3e3e3e",
-        "entry_fg": "#ffffff",
-        "button_bg": "#5e5e5e",
-        "button_fg": "#ffffff",
     },
     "protanopia": {
         "bg": "#fdf6e3",
         "fg": "#073642",
-        "entry_bg": "#eee8d5",
-        "entry_fg": "#073642",
-        "button_bg": "#93a1a1",
-        "button_fg": "#073642",
     },
     "deuteranopia": {
         "bg": "#fdf6e3",
         "fg": "#002b36",
-        "entry_bg": "#eee8d5",
-        "entry_fg": "#002b36",
-        "button_bg": "#839496",
-        "button_fg": "#002b36",
     },
 }
 
-# Función para guardar configuraciones en config.json
-def guardar_configuracion(clave, valor):
-    config["interface"][clave] = valor
+# Guardar configuración en tiempo real
+def guardar_config():
     with open("config.json", "w") as config_file:
         json.dump(config, config_file, indent=4)
 
-# Función para cambiar el modo
-def cambiar_modo(modo):
-    colores = MODOS[modo]
-    root.config(bg=colores["bg"])
-    pregunta_label.config(bg=colores["bg"], fg=colores["fg"])
-    respuesta_label.config(bg=colores["bg"], fg=colores["fg"])
-    entrada_pregunta.config(bg=colores["entry_bg"], fg=colores["entry_fg"])
-    salida_respuesta.config(bg=colores["entry_bg"], fg=colores["entry_fg"])
-    enviar_button.config(bg=colores["button_bg"], fg=colores["button_fg"])
-    modo_claro_button.config(bg=colores["button_bg"], fg=colores["button_fg"])
-    modo_oscuro_button.config(bg=colores["button_bg"], fg=colores["button_fg"])
-    protanopia_button.config(bg=colores["button_bg"], fg=colores["button_fg"])
-    deuteranopia_button.config(bg=colores["button_bg"], fg=colores["button_fg"])
-    guardar_configuracion("default_mode", modo)  # Guardar el modo seleccionado en config.json
 
-# Función para mostrar puntos suspensivos de carga en el historial
-def mostrar_cargando():
-    if not loading_animation_enabled:
-        return
-    salida_respuesta.config(state="normal")
-    cargando_tag = salida_respuesta.index("end-1c")  # Guardar la posición inicial del texto "Cargando"
-    salida_respuesta.insert(tk.END, "Chatbot: Cargando.\n")
-    for ciclo in range(loading_cycles):  # Repetir la cantidad de ciclos configurada
-        for puntos in [".", "..", "..."]:
-            salida_respuesta.delete(cargando_tag, "end-1c")  # Eliminar el texto anterior de "Cargando"
-            salida_respuesta.insert(tk.END, f"Chatbot: Cargando{puntos}\n")
-            salida_respuesta.update()
-            time.sleep(loading_delay)  # Usar el delay configurado en config.json
-    salida_respuesta.delete(cargando_tag, "end-1c")  # Eliminar el texto de "Cargando" al finalizar
-    salida_respuesta.insert(tk.END, "Chatbot: Cargando completado.\n")
-    salida_respuesta.update()
-    time.sleep(completion_delay)  # Esperar antes de borrar "Cargando completado."
-    salida_respuesta.delete("end-2l", "end-1c")  # Borrar "Cargando completado."
+def main(page: ft.Page):
+    aplicar_config()
+    page.title = "Chatbot Flet UI"
+    page.window_width, page.window_height = map(int, resolution.split("x"))
+    page.scroll = ft.ScrollMode.AUTO
+    page.theme_mode = ft.ThemeMode.DARK if default_mode == "oscuro" else ft.ThemeMode.LIGHT
 
-# Función para procesar la pregunta con delay
-def procesar_pregunta_con_delay():
-    pregunta = entrada_pregunta.get()
-    if not pregunta.strip():
-        messagebox.showwarning("Advertencia", "Por favor, escribe una pregunta.")
-        return
+    entrada_pregunta = ft.TextField(label="Escribe tu pregunta", expand=True)
+    salida_respuesta = ft.TextField(multiline=True, read_only=True, min_lines=10, expand=True)
+    boton_enviar = ft.ElevatedButton("Enviar", disabled=False)
 
-    # Variables compartidas entre hilos
-    respuesta_event = threading.Event()  # Evento para indicar que la respuesta está lista
-    respuesta_data = {"respuesta": None, "categoria": None, "similitud": None}  # Almacena la respuesta del chatbot
+    # Estilo CSS para cambiar el cursor cuando el botón está deshabilitado
+    page.styles = {
+        "button:disabled": {
+            "cursor": "not-allowed",
+        }
+    }
 
-    # Hilo para procesar la pregunta
-    def procesar_pregunta_en_hilo():
-        respuesta, categoria, similitud = procesar_pregunta(pregunta, directorio_csv)
-        respuesta_data["respuesta"] = respuesta
-        respuesta_data["categoria"] = categoria
-        respuesta_data["similitud"] = similitud
-        respuesta_event.set()  # Indicar que la respuesta está lista
+    def mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms):
+        salida_respuesta.value += f"\nChatbot ({categoria}): {respuesta} (Similitud: {similitud:.2f}%) [{tiempo_ms} ms]\n"
+        page.update()
 
-    # Hilo para mostrar la animación de carga
-    def animar_y_responder():
-        salida_respuesta.config(state="normal")
-        salida_respuesta.insert(tk.END, f"Tú: {pregunta}\n")
-        salida_respuesta.config(state="disabled")
+    def mostrar_cargando():
+        if not loading_animation_enabled:
+            return
+        cargando_tag = len(salida_respuesta.value)
+        for ciclo in range(loading_cycles):
+            for puntos in [".", "..", "..."]:
+                salida_respuesta.value = salida_respuesta.value[:cargando_tag] + f"Chatbot: Cargando{puntos}\n"
+                page.update()
+                time.sleep(loading_delay)
+        salida_respuesta.value = salida_respuesta.value[:cargando_tag] + "Chatbot: Cargando completado.\n"
+        page.update()
+        time.sleep(completion_delay)
 
-        # Mostrar animación de carga
-        mostrar_cargando()
+    def manejar_pregunta(e):
+        pregunta = entrada_pregunta.value.strip()
+        if not pregunta:
+            return
 
-        # Esperar a que la respuesta esté lista si aún no lo está
-        respuesta_event.wait()
+        # Bloquear el campo de entrada y el botón de enviar
+        entrada_pregunta.disabled = True
+        boton_enviar.disabled = True
+        page.update()
 
-        # Mostrar la respuesta cuando esté lista
-        salida_respuesta.config(state="normal")
-        if respuesta_data["respuesta"]:
-            salida_respuesta.insert(
-                tk.END,
-                f"Chatbot ({respuesta_data['categoria']}): {respuesta_data['respuesta']} (Similitud: {respuesta_data['similitud']:.2f}%)\n\n",
-            )
-        else:
-            salida_respuesta.insert(tk.END, "Chatbot: Lo siento, no entiendo tu pregunta.\n\n")
-        salida_respuesta.config(state="disabled")
+        salida_respuesta.value += f"\nTú: {pregunta}\n"
+        entrada_pregunta.value = ""
+        page.update()
 
-        entrada_pregunta.delete(0, tk.END)
+        def hilo_chat():
+            inicio = time.perf_counter()
+            respuesta, categoria, similitud = procesar_pregunta(pregunta, directorio_csv)
+            fin = time.perf_counter()
+            tiempo_ms = int((fin - inicio) * 1000)
+            if loading_animation_enabled:
+                mostrar_cargando()
+            if respuesta:
+                mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms)
+            else:
+                salida_respuesta.value += "\nChatbot: Lo siento, no entiendo tu pregunta.\n"
+                page.update()
 
-    # Crear y ejecutar los hilos
-    threading.Thread(target=procesar_pregunta_en_hilo).start()
-    threading.Thread(target=animar_y_responder).start()
+            # Habilitar el campo de entrada y el botón de enviar nuevamente
+            entrada_pregunta.disabled = False
+            boton_enviar.disabled = False
+            page.update()
 
-# Crear la ventana principal
-root = tk.Tk()
-root.title("Chatbot")
-root.geometry(resolution)  # Usar la resolución configurada en config.json
+        threading.Thread(target=hilo_chat).start()
 
-# Widgets
-pregunta_label = tk.Label(root, text="Escribe tu pregunta:")
-pregunta_label.pack(pady=5)
+    def cambiar_modo(modo):
+        config["interface"]["default_mode"] = modo
+        guardar_config()
+        aplicar_config()
+        colores = MODOS[modo]
+        page.bgcolor = colores["bg"]
+        page.color = colores["fg"]
+        page.theme_mode = ft.ThemeMode.DARK if modo == "oscuro" else ft.ThemeMode.LIGHT
+        page.update()
 
-entrada_pregunta = tk.Entry(root, width=80)
-entrada_pregunta.pack(pady=5)
+    def abrir_config_modal(e):
+        campos = []
 
-enviar_button = tk.Button(root, text="Enviar", command=procesar_pregunta_con_delay)
-enviar_button.pack(pady=5)
+        def guardar_nueva_config(e):
+            try:
+                for campo in campos:
+                    secciones = campo["key"].split(".")
+                    valor = campo["entrada"].value
+                    obj = config
+                    for k in secciones[:-1]:
+                        obj = obj[k]
+                    clave_final = secciones[-1]
+                    # Validar y convertir el valor ingresado
+                    if valor.lower() in ["true", "false"]:
+                        obj[clave_final] = valor.lower() == "true"
+                    elif valor.replace('.', '', 1).isdigit():
+                        obj[clave_final] = float(valor) if '.' in valor else int(valor)
+                    else:
+                        obj[clave_final] = valor
+                # Guardar la configuración y aplicar los cambios
+                guardar_config()
+                aplicar_config()
+                page.window_width, page.window_height = map(int, resolution.split("x"))
+                page.theme_mode = ft.ThemeMode.DARK if default_mode == "oscuro" else ft.ThemeMode.LIGHT
+                dlg.open = False
+                page.snack_bar = ft.SnackBar(ft.Text("Configuración guardada con éxito."), open=True)
+                page.update()
+            except Exception as ex:
+                page.snack_bar = ft.SnackBar(ft.Text(f"Error al guardar configuración: {ex}"), open=True)
+                page.update()
 
-respuesta_label = tk.Label(root, text="Respuestas:")
-respuesta_label.pack(pady=5)
+        contenido = []
+        for seccion, datos in config.items():
+            if isinstance(datos, dict):
+                for clave, valor in datos.items():
+                    key_path = f"{seccion}.{clave}"
+                    entrada = ft.TextField(label=key_path, value=str(valor))
+                    campos.append({"key": key_path, "entrada": entrada})
+                    contenido.append(entrada)
 
-salida_respuesta = tk.Text(root, width=80, height=15, state="disabled")
-salida_respuesta.pack(pady=5)
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Editar Configuración"),
+            content=ft.Container(
+                content=ft.Column(contenido, scroll=ft.ScrollMode.ADAPTIVE),
+                padding=ft.padding.all(10),
+            ),
+            actions=[
+                ft.TextButton("Guardar", on_click=guardar_nueva_config),
+                ft.TextButton("Cancelar", on_click=lambda e: setattr(dlg, "open", False))
+            ],
+            actions_alignment=ft.MainAxisAlignment.END
+        )
 
-# Botones para cambiar el modo
-modo_claro_button = tk.Button(root, text="Modo Claro", command=lambda: cambiar_modo("claro"))
-modo_claro_button.pack(side="left", padx=5, pady=5)
+        # Asignar el modal a la página y abrirlo
+        page.dialog = dlg
+        dlg.open = True  # Aquí se abre el modal
+        page.update()
 
-modo_oscuro_button = tk.Button(root, text="Modo Oscuro", command=lambda: cambiar_modo("oscuro"))
-modo_oscuro_button.pack(side="left", padx=5, pady=5)
+    boton_config = ft.ElevatedButton("⚙ Configurar", on_click=abrir_config_modal)
+    botones_modo = ft.Row([
+        ft.ElevatedButton("Claro", on_click=lambda e: cambiar_modo("claro")),
+        ft.ElevatedButton("Oscuro", on_click=lambda e: cambiar_modo("oscuro")),
+        ft.ElevatedButton("Protanopia", on_click=lambda e: cambiar_modo("protanopia")),
+        ft.ElevatedButton("Deuteranopia", on_click=lambda e: cambiar_modo("deuteranopia"))
+    ], alignment=ft.MainAxisAlignment.CENTER)
 
-protanopia_button = tk.Button(root, text="Protanopia", command=lambda: cambiar_modo("protanopia"))
-protanopia_button.pack(side="left", padx=5, pady=5)
+    boton_enviar.on_click = manejar_pregunta
+    entrada_pregunta.on_submit = manejar_pregunta  # Permitir enviar con Enter
 
-deuteranopia_button = tk.Button(root, text="Deuteranopia", command=lambda: cambiar_modo("deuteranopia"))
-deuteranopia_button.pack(side="left", padx=5, pady=5)
+    page.add(
+        entrada_pregunta,
+        boton_enviar,
+        salida_respuesta,
+        ft.Divider(),
+        botones_modo,
+        boton_config
+    )
 
-# Establecer el modo inicial
-cambiar_modo(config["interface"]["default_mode"])
-
-# Ejecutar la aplicación
-root.mainloop()
+ft.app(target=main)

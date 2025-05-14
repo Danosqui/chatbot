@@ -1,17 +1,17 @@
 {
-  "chatbot": {
-    "csv_directory": "CSVs",
-    "default_similarity_threshold": 70,
-    "save_unanswered_questions": true,
-    "unanswered_questions_file": "Preguntas sin poder responder.csv"
-  },
-  "interface": {
-    "default_theme": "arc",
-    "default_mode": "oscuro",
-    "loading_delay": 0.5,
-    "loading_animation": true,
-    "loading_cycles": 3,
-    "completion_delay": 1.75,
-    "resolution": "900x450"
-  }
+    "chatbot": {
+        "csv_directory": "CSVs",
+        "default_similarity_threshold": 70,
+        "save_unanswered_questions": true,
+        "unanswered_questions_file": "Preguntas sin poder responder.csv"
+    },
+    "interface": {
+        "default_theme": "arc",
+        "default_mode": "oscuro",
+        "loading_delay": 0.5,
+        "loading_animation": true,
+        "loading_cycles": 3,
+        "completion_delay": 1.75,
+        "resolution": "900x450"
+    }
 }

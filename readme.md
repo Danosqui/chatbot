@@ -9,24 +9,22 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
 - Responde preguntas basándose en los datos almacenados en archivos CSV.
 - Soporta múltiples categorías, cada una representada por un archivo CSV.
 - Lematiza y normaliza las preguntas para mejorar la precisión de las respuestas.
-- Si no encuentra una respuesta, guarda la pregunta en un archivo llamado `Preguntas sin poder responder.csv`.
-- Responde rápidamente gracias a la integración con **spaCy** para lematización y **RapidFuzz** para comparación de similitud.
-- Permite buscar preguntas específicas dentro de una categoría o en todas las categorías disponibles.
+- Si no encuentra una respuesta, guarda la pregunta en un archivo llamado `Preguntas sin poder responder.csv`. [configurable]
+- Responde rápidamente gracias a la integración artesanal propia para lematización y **RapidFuzz** para comparación de similitud.
 - Responde con ejemplos aleatorios si se consulta directamente el nombre de una categoría.
 - **Interfaz gráfica**:
   - Incluye un modo claro, un modo oscuro y soporte para daltonismo (protanopia y deuteranopia).
   - Permite interactuar con el chatbot de manera visual y amigable.
-  - Animación de carga (`"."`, `".."`, `"..."`) con un mensaje de "Cargando completado.".
+  - Animación de carga (`"."`, `".."`, `"..."`) con un mensaje de "Cargando completado.". [configurable]
   - Configuración dinámica de la interfaz mediante un archivo `config.json`.
   - Procesamiento de preguntas y animación de carga en paralelo para mejorar la experiencia del usuario.
 
 ## Requisitos
 
-- Python 3.7 o superior [3.11.x recomendado, 3.13.x no es soportado actualmente por limitaciones de spaCy].
+- Python 3.7 o superior [3.11.x recomendado, 3.13.x no es recomendado con Flet].
 - pip para instalar dependencias.
-- **spaCy** y el modelo de español (`es_core_news_sm`).
 - **RapidFuzz** para comparación de similitud.
-- **Tkinter** (incluido en Python por defecto) para la interfaz gráfica.
+- **Flet** para la interfaz gráfica.
 
 ## Instalación
 
@@ -38,8 +36,7 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
 
 2. Instala las dependencias necesarias:
    ```bash
-   pip install spacy rapidfuzz
-   python -m spacy download es_core_news_sm
+   pip install flet rapidfuzz
    ```
 
 3. Asegúrate de que los archivos CSV estén en la carpeta `CSVs`. Ejemplo de estructura:
@@ -50,8 +47,9 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
    │   ├── pokemon.csv
    │   └── Preguntas sin poder responder.csv
    ├── chat.py
-   ├── interfaz.py
    ├── config.json
+   ├── interfaz.py
+   ├── procesamiento_texto.py
    ├── readme.md
    ```
 
@@ -141,6 +139,7 @@ Consulta la documentación completa en el siguiente enlace:
 
 ## Changelog
 b indica que pertenece a la version Development de el proyecto
+f indica que pertenece a la version Flet-Development de el proyecto
 ```
 8 de mayo de 2025 0.1
 • Creación del chatbot
@@ -152,6 +151,17 @@ b indica que pertenece a la version Development de el proyecto
 • Mejora en la GUI e implementación de un config.json
 • animación de carga mejorada y manejo dinámico del historial
 • procesamiento de preguntas y animación en paralelo
+14 de mayo de 2025 1.2b
+• bloqueo al estar procesando una pregunta, eliminado errores inesperados
+• eliminacion de "palabras vacias" al procesar la pregunta
+• loading_animation ahora es funcional
+• configuración a tiempo real dentro de la interfaz
+• muestra en milisegundos el tiempo de respuesta
+14 de mayo de 2025 1.2F
+• Rework a chat.py [eliminacion de spaCy e "implementacion manual"]
+• Rework a interfaz.py [eliminacion de tkinter e implementación de flet]
+14 de mayo de 2025 1.2.1F
+• revisión del readme.md
 ```
 
 ## Instalación alternativa con npm
@@ -176,5 +186,12 @@ cd chatbot
 ### **Notas adicionales**
 - Esta es una **versión de desarrollo**, por lo que algunas características pueden estar incompletas o en progreso.
 - Documentación en proceso.
+- **Changelog se actualiza constantemente entre actualizaciones pero sus caracteristicas y demás no**
+---
+
+### TO-DO
+• Arreglar el modal de configuracion de la interfaz
+• Que se puedan añadir preguntas desde el chat y la interfaz
+• que permita buscar preguntas específicas dentro de una categoría o en todas las categorías disponibles.
 
 ---
