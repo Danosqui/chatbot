@@ -3,6 +3,8 @@ import json
 import threading
 import time
 from chat import procesar_pregunta
+from chat import getCategorias
+from chat import cargarPregunta
 
 # Cargar configuraciones desde config.json
 def cargar_config():
@@ -50,18 +52,9 @@ def guardar_config():
         json.dump(config, config_file, indent=4)
 
 
+
 def main(page: ft.Page):
 
-    dlg = ft.AlertDialog(
-        title=ft.Text("Hello"),
-        content=ft.Text("You are notified!"),
-        alignment=ft.alignment.center,
-        on_dismiss=lambda e: print("Dialog dismissed!"),
-        title_padding=ft.padding.all(25),
-    )
-    page.add(
-        ft.ElevatedButton("Open dialog", on_click=lambda e: page.open(dlg)),
-    )
 
     aplicar_config()
     page.title = "Chatbot Flet UI"
@@ -144,6 +137,46 @@ def main(page: ft.Page):
         page.theme_mode = ft.ThemeMode.DARK if modo == "oscuro" else ft.ThemeMode.LIGHT
         page.update()
 
+
+    def abrirNuevaPregunta_modal(e):
+        
+        categorias = getCategorias(directorio_csv)
+        opcionesCat = []
+        for categoria in categorias:
+            opcionesCat.append(ft.dropdown.Option(categoria))
+
+        categoria = ft.Dropdown(label="Categoria",options=opcionesCat,width=400)
+        pregunta = ft.TextField(label="Pregunta", multiline=True)
+        respuesta = ft.TextField(label="Respuesta", multiline=True)
+
+        def guardar_datos(ev):
+            
+            cargarPregunta(directorio_csv,categoria.value,pregunta.value,respuesta.value)
+            dialog.open = False
+            page.update()
+
+        def cerrar_modal(ev):
+            dialog.open = False
+            page.update()
+
+        dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Nueva pregunta"),
+            content=ft.Column(
+                controls=[categoria, pregunta, respuesta],
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton("Guardar", on_click=guardar_datos),
+                ft.TextButton("Cerrar", on_click=cerrar_modal),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+
+        page.dialog = dialog
+        page.open(dialog)
+        page.update()
+
     def abrir_config_modal(e):
         campos = []
 
@@ -206,7 +239,9 @@ def main(page: ft.Page):
         page.open(dlg)
         page.update()
 
+
     boton_config = ft.ElevatedButton("⚙ Configurar", on_click=abrir_config_modal)
+    boton_newPregunta = ft.ElevatedButton("+ Nueva pregunta", on_click=abrirNuevaPregunta_modal)
     botones_modo = ft.Row([
         ft.ElevatedButton("Claro", on_click=lambda e: cambiar_modo("claro")),
         ft.ElevatedButton("Oscuro", on_click=lambda e: cambiar_modo("oscuro")),
@@ -223,7 +258,8 @@ def main(page: ft.Page):
         salida_respuesta,
         ft.Divider(),
         botones_modo,
-        boton_config
+        boton_config,
+        boton_newPregunta
     )
 
 ft.app(target=main)

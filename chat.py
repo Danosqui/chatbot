@@ -12,6 +12,33 @@ def cargar_config():
         return json.load(config_file)
 
 config = cargar_config()
+def getCategorias(directorio):
+    categorias = []
+
+    for archivo in os.listdir(directorio):
+        if archivo.endswith(".csv"):
+            ruta_archivo = os.path.join(directorio, archivo)
+            try:
+                with open(ruta_archivo, newline='', encoding='utf-8') as f:
+                    lector = csv.reader(f)
+                    primera_fila = next(lector, None)
+                    if primera_fila:
+                        categorias.append(primera_fila[0]) #esto es medio feo pero funciona
+            except Exception as e:
+                print(f"Error al leer {archivo}: {e}")
+
+    return categorias
+
+def cargarPregunta(directorio,categoria,pregunta,respuesta):
+    
+    for archivo in os.listdir(directorio):
+        categoriaArchivo = categoria + ".csv"
+        if archivo.lower() == categoriaArchivo:
+            ruta = os.path.join(directorio,categoriaArchivo)
+            with open(ruta,"a") as archivo:
+                escritor = csv.writer(archivo)
+                escritor.writerow([pregunta,respuesta])
+
 
 # Función para leer múltiples archivos CSV y extraer preguntas, respuestas y categorías
 def cargar_datos_csv(directorio):
