@@ -51,6 +51,18 @@ def guardar_config():
 
 
 def main(page: ft.Page):
+
+    dlg = ft.AlertDialog(
+        title=ft.Text("Hello"),
+        content=ft.Text("You are notified!"),
+        alignment=ft.alignment.center,
+        on_dismiss=lambda e: print("Dialog dismissed!"),
+        title_padding=ft.padding.all(25),
+    )
+    page.add(
+        ft.ElevatedButton("Open dialog", on_click=lambda e: page.open(dlg)),
+    )
+
     aplicar_config()
     page.title = "Chatbot Flet UI"
     page.window_width, page.window_height = map(int, resolution.split("x"))
@@ -191,7 +203,7 @@ def main(page: ft.Page):
 
         # Asignar el modal a la página y abrirlo
         page.dialog = dlg
-        dlg.open = True  # Aquí se abre el modal
+        page.open(dlg)
         page.update()
 
     boton_config = ft.ElevatedButton("⚙ Configurar", on_click=abrir_config_modal)

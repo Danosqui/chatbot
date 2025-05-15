@@ -197,7 +197,7 @@ cd chatbot
 ---
 
 ### TO-DO
-• Arreglar el modal de configuracion de la interfaz
+• ~~Arreglar el modal de configuracion de la interfaz~~
 • Que se puedan añadir preguntas desde el chat y la interfaz
 • que permita buscar preguntas específicas dentro de una categoría o en todas las categorías disponibles.
 
