@@ -55,6 +55,11 @@ def main(page: ft.Page):
     page.title = "Chatbot Flet UI"
     page.window_width, page.window_height = map(int, resolution.split("x"))
     page.scroll = ft.ScrollMode.AUTO
+
+    # Aplicar el modo inicial desde la configuración
+    colores = MODOS[default_mode]
+    page.bgcolor = colores["bg"]
+    page.color = colores["fg"]
     page.theme_mode = ft.ThemeMode.DARK if default_mode == "oscuro" else ft.ThemeMode.LIGHT
 
     entrada_pregunta = ft.TextField(label="Escribe tu pregunta", expand=True)
@@ -101,15 +106,13 @@ def main(page: ft.Page):
 
         def hilo_chat():
             inicio = time.perf_counter()
-            respuesta, categoria, similitud = procesar_pregunta(pregunta, directorio_csv)
-            fin = time.perf_counter()
-            tiempo_ms = int((fin - inicio) * 1000)
+            respuesta, categoria, similitud, tiempo_ms = procesar_pregunta(pregunta, directorio_csv)
             if loading_animation_enabled:
                 mostrar_cargando()
             if respuesta:
                 mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms)
             else:
-                salida_respuesta.value += "\nChatbot: Lo siento, no entiendo tu pregunta.\n"
+                salida_respuesta.value += f"\nChatbot: Lo siento, no entiendo tu pregunta. [{tiempo_ms} ms]\n"
                 page.update()
 
             # Habilitar el campo de entrada y el botón de enviar nuevamente
@@ -152,6 +155,9 @@ def main(page: ft.Page):
                 guardar_config()
                 aplicar_config()
                 page.window_width, page.window_height = map(int, resolution.split("x"))
+                colores = MODOS[default_mode]
+                page.bgcolor = colores["bg"]
+                page.color = colores["fg"]
                 page.theme_mode = ft.ThemeMode.DARK if default_mode == "oscuro" else ft.ThemeMode.LIGHT
                 dlg.open = False
                 page.snack_bar = ft.SnackBar(ft.Text("Configuración guardada con éxito."), open=True)

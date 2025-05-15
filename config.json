@@ -6,7 +6,6 @@
         "unanswered_questions_file": "Preguntas sin poder responder.csv"
     },
     "interface": {
-        "default_theme": "arc",
         "default_mode": "oscuro",
         "loading_delay": 0.5,
         "loading_animation": true,

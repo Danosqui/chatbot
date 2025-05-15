@@ -8,7 +8,6 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
 
 - Responde preguntas basándose en los datos almacenados en archivos CSV.
 - Soporta múltiples categorías, cada una representada por un archivo CSV.
-- Lematiza y normaliza las preguntas para mejorar la precisión de las respuestas.
 - Si no encuentra una respuesta, guarda la pregunta en un archivo llamado `Preguntas sin poder responder.csv`. [configurable]
 - Responde rápidamente gracias a la integración artesanal propia para lematización y **RapidFuzz** para comparación de similitud.
 - Responde con ejemplos aleatorios si se consulta directamente el nombre de una categoría.
@@ -66,7 +65,6 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
     "unanswered_questions_file": "Preguntas sin poder responder.csv"
   },
   "interface": {
-    "default_theme": "arc",
     "default_mode": "oscuro",
     "loading_delay": 0.5,
     "loading_animation": true,
@@ -78,12 +76,15 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
 ```
 
 ### Opciones configurables:
-- **`default_theme`**: Tema predeterminado para la interfaz gráfica (compatible con `ttkthemes`).
+- **`csv_directory`**: Ruta de la carpeta donde se encuentran los CSVs.
+- **`default_similarity_threshold`**: Porcentaje (del 1 al 100) en el que considera el minimo de similitud para que sea considerada valida la respuesta.
+- **`save_unanswered_quiestions`**: Boolean para decidir si guardar el input ingresado por el usuario cuando no se le encuentra una respuesta acertada.
+- **`unanswered_questions_file`**: Nombre del archivo CSV en el cual se guardan los input ingresados por el usuario cuando no se le encuentra una respuesta acertada.
 - **`default_mode`**: Modo predeterminado de la interfaz gráfica (`claro`, `oscuro`, `protanopia`, `deuteranopia`).
 - **`loading_delay`**: Tiempo (en segundos) entre los puntos de la animación (`"."`, `".."`, `"..."`).
-- **`completion_delay`**: Tiempo (en segundos) que tarda en desaparecer el mensaje "Cargando completado." antes de mostrar la respuesta.
 - **`loading_animation`**: Activa o desactiva la animación de carga.
 - **`loading_cycles`**: Cantidad de ciclos de la animación de carga.
+- **`completion_delay`**: Tiempo (en segundos) que tarda en desaparecer el mensaje "Cargando completado." antes de mostrar la respuesta.
 - **`resolution`**: Resolución de la ventana gráfica (por ejemplo, `"800x600"`).
 
 ## Uso
@@ -162,6 +163,12 @@ f indica que pertenece a la version Flet-Development de el proyecto
 • Rework a interfaz.py [eliminacion de tkinter e implementación de flet]
 14 de mayo de 2025 1.2.1F
 • revisión del readme.md
+14 de mayo de 2025 1.3F
+• Ajuste de modo oscuro en interfaz.py
+• Eliminacion de temas de tkinter en config.json
+• Modificaciones del readme.md acorde a cambios anteriores
+• "Centralizada" la lógica en chat.py
+• "Simplificado" interfaz.py
 ```
 
 ## Instalación alternativa con npm

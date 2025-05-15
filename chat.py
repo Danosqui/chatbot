@@ -1,14 +1,23 @@
 import os
 import csv
 import random
+import time
+import json
 from rapidfuzz import fuzz
 from procesamiento_texto import preprocesar_texto
+
+# Cargar configuraciones desde config.json
+def cargar_config():
+    with open("config.json", "r") as config_file:
+        return json.load(config_file)
+
+config = cargar_config()
 
 # Función para leer múltiples archivos CSV y extraer preguntas, respuestas y categorías
 def cargar_datos_csv(directorio):
     datos = []
     for archivo in os.listdir(directorio):
-        if archivo.endswith('.csv') and archivo != 'Preguntas sin poder responder.csv':
+        if archivo.endswith('.csv') and archivo != config["chatbot"]["unanswered_questions_file"]:
             ruta = os.path.join(directorio, archivo)
             with open(ruta, 'r', encoding='utf-8') as f:
                 lector = csv.reader(f)
@@ -29,7 +38,7 @@ def cargar_datos_csv(directorio):
     return datos
 
 # Función para buscar la pregunta más similar o interpretar la categoría
-def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral=80):
+def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral):
     pregunta_usuario_lematizada = preprocesar_texto(pregunta_usuario)
     mejor_similitud = 0
     mejor_respuesta = None
@@ -70,32 +79,26 @@ def buscar_pregunta_mas_similar(pregunta_usuario, datos, umbral=80):
     else:
         return None, None, mejor_similitud
 
+# Función para guardar preguntas no respondidas
+def guardar_pregunta_no_respondida(pregunta, directorio_csv, archivo):
+    if config["chatbot"]["save_unanswered_questions"]:
+        ruta = os.path.join(directorio_csv, archivo)
+        with open(ruta, 'a', encoding='utf-8', newline='') as f:
+            escritor = csv.writer(f)
+            escritor.writerow([pregunta])
+
 # Función principal del chatbot
-def procesar_pregunta(pregunta, directorio_csv):
+def procesar_pregunta(pregunta, directorio_csv, umbral=None):
+    if umbral is None:
+        umbral = config["chatbot"]["default_similarity_threshold"]
+
     datos = cargar_datos_csv(directorio_csv)
-    respuesta, categoria, similitud = buscar_pregunta_mas_similar(pregunta, datos)
-    return respuesta, categoria, similitud
+    inicio = time.perf_counter()
+    respuesta, categoria, similitud = buscar_pregunta_mas_similar(pregunta, datos, umbral)
+    fin = time.perf_counter()
+    tiempo_ms = int((fin - inicio) * 1000)
 
-if __name__ == "__main__":
-    import argparse
+    if respuesta is None:
+        guardar_pregunta_no_respondida(pregunta, directorio_csv, config["chatbot"]["unanswered_questions_file"])
 
-    parser = argparse.ArgumentParser(description="Chatbot basado en CSVs")
-    parser.add_argument("--csv_directory", type=str, default="CSVs", help="Directorio donde se encuentran los archivos CSV")
-    args = parser.parse_args()
-
-    if not os.path.exists(args.csv_directory):
-        print(f"Error: El directorio '{args.csv_directory}' no existe.")
-        exit(1)
-
-    print("Chatbot listo. Escribe 'salir' para terminar.")
-    while True:
-        pregunta_usuario = input("Tú: ")
-        if pregunta_usuario.lower() == "salir":
-            print("Chatbot: ¡Hasta luego!")
-            break
-
-        respuesta, categoria, similitud = procesar_pregunta(pregunta_usuario, args.csv_directory)
-        if respuesta:
-            print(f"Chatbot ({categoria}): {respuesta} (Similitud: {similitud:.2f}%)")
-        else:
-            print("Chatbot: Lo siento, no entiendo tu pregunta.")
+    return respuesta, categoria, similitud, tiempo_ms
