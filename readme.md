@@ -42,8 +42,9 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
    ```
    chatbot/
    ├── CSVs/
-   │   ├── programacion.csv
-   │   ├── pokemon.csv
+   │   ├── Archivos.json
+   │   ├── Programacion.csv
+   │   ├── Pokemon.csv
    │   └── Preguntas sin poder responder.csv
    ├── .gitignore
    ├── Ayuda.txt
