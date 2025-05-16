@@ -159,19 +159,19 @@ f indica que pertenece a la version Flet-Development de el proyecto
 • Implementación de interfaz gráfica
 13 de mayo de 2025 1.1b
 • Mejora en la GUI e implementación de un config.json
-• animación de carga mejorada y manejo dinámico del historial
-• procesamiento de preguntas y animación en paralelo
+• Animación de carga mejorada y manejo dinámico del historial
+• Procesamiento de preguntas y animación en paralelo
 14 de mayo de 2025 1.2b
-• bloqueo al estar procesando una pregunta, eliminado errores inesperados
-• eliminacion de "palabras vacias" al procesar la pregunta
-• loading_animation ahora es funcional
-• configuración a tiempo real dentro de la interfaz
-• muestra en milisegundos el tiempo de respuesta
+• Bloqueo al estar procesando una pregunta, eliminado errores inesperados
+• Eliminacion de "palabras vacias" al procesar la pregunta
+• Loading_animation ahora es funcional
+• Configuración a tiempo real dentro de la interfaz
+• Muestra en milisegundos el tiempo de respuesta
 14 de mayo de 2025 1.2F
 • Rework a chat.py [eliminacion de spaCy e "implementacion manual"]
 • Rework a interfaz.py [eliminacion de tkinter e implementación de flet]
 14 de mayo de 2025 1.2.1F
-• revisión del readme.md
+• Revisión del readme.md
 14 de mayo de 2025 1.3F
 • Ajuste de modo oscuro en interfaz.py
 • Eliminacion de temas de tkinter en config.json
@@ -195,6 +195,9 @@ f indica que pertenece a la version Flet-Development de el proyecto
 • Texto a la derecha y la izquierda, ¡Como en una conversacion!
 • Rework del manejo de la respuesta en la interfaz
 • Ahora es posible añadir una categoría [consola e interfaz]
+16 de mayo de 2025 1.7
+• Arreglo en el nombre de categoria del json
+• Manejo de multiples lineas solucionado en interfaz
 ```
 
 ## Autores
@@ -215,6 +218,6 @@ f indica que pertenece a la version Flet-Development de el proyecto
 - ~~Arreglar el modal de configuracion de la interfaz~~
 - ~~Que se puedan añadir preguntas desde el chat y la interfaz~~
 - Que permita buscar preguntas específicas dentro de una categoría o en todas las categorías disponibles.
-- Implementar nuevos tipos de archivos para leer
+- ~~Implementar nuevos tipos de archivos para leer~~
 
 ---

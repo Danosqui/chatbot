@@ -100,13 +100,20 @@ def main(page: ft.Page):
                                 text_align="right" if es_usuario else "left",
                                 style=ft.TextThemeStyle.BODY_LARGE,
                                 color="#2196F3" if es_usuario else color_bot,
+
+                                # no_wrap=False,
+                                # max_lines=None,  
+                                #No voy a mentir a nadie, NO SE PARA QUE SIRVEN REALMENTE
+                                # Las 2 lineas comentadas de abajo hacen lo que necesitaba y creí que estas servirían
+
+                                overflow=ft.TextOverflow.VISIBLE,  # flet bendiga esta linea
                             ),
                             bgcolor=bg_usuario if es_usuario else bg_bot,
                             padding=10,
                             border_radius=20,
                             alignment=ft.alignment.center_right if es_usuario else ft.alignment.center_left,
                             margin=ft.margin.only(left=40) if es_usuario else ft.margin.only(right=40),
-                            expand=False,
+                            expand=False if es_usuario else True, # Ajusta el ancho del contenedor dependiendo quien es el que escribe
                         )
                     ],
                     alignment=ft.MainAxisAlignment.END if es_usuario else ft.MainAxisAlignment.START,
