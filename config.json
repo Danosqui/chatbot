@@ -1,0 +1,18 @@
+{
+    "chatbot": {
+        "csv_directory": "CSVs",
+        "default_similarity_threshold": 70,
+        "save_unanswered_questions": true,
+        "unanswered_questions_file": "Preguntas sin poder responder.csv",
+        "help_file": "Ayuda.txt",
+        "info_file": "Info.txt"
+    },
+    "interface": {
+        "default_mode": "oscuro",
+        "loading_delay": 0.5,
+        "loading_animation": true,
+        "loading_cycles": 3,
+        "completion_delay": 1.75,
+        "resolution": "900x450"
+    }
+}

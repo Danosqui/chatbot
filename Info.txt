@@ -1,0 +1,5 @@
+Información sobre los comandos:
+- /salir: [SOLO FUNCIONA POR CONSOLA] la funcion del chatbot se detiene
+- /cargar: Permite agregar preguntas y respuestas a una categoría específica.
+- /ayuda: Muestra el contenido del archivo de ayuda.
+- /info: Muestra esta información sobre los comandos disponibles.

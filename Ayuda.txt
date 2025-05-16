@@ -1,0 +1,3 @@
+Si estas leyendo esto, utilizaste /Ayuda
+No tenemos realmente planeado que hacer acá, si tenes dudas de los comandos utilizá /Info
+Si tenes alguna que otra duda, no duden en ver el readme.md [Creo que sería mejor verlo desde el repositorio]
