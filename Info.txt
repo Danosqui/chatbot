@@ -1,5 +1,6 @@
 Información sobre los comandos:
-- /salir: [SOLO FUNCIONA POR CONSOLA] la funcion del chatbot se detiene
+- /salir: [SOLO FUNCIONA POR CONSOLA] la función del chatbot se detiene.
 - /cargar: Permite agregar preguntas y respuestas a una categoría específica.
 - /ayuda: Muestra el contenido del archivo de ayuda.
 - /info: Muestra esta información sobre los comandos disponibles.
+- /categoria <nombre> [csv|json]: Crea una nueva categoría con el nombre y tipo de archivo especificado (csv por defecto si no se indica). No permite duplicados, insensible a mayúsculas/minúsculas.

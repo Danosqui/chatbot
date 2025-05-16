@@ -188,6 +188,12 @@ f indica que pertenece a la version Flet-Development de el proyecto
 • Utilización de comandos ("/salir", "/cargar" y "ayuda" "/info")
 • Creación de utilidades varias (ahora config.json realmente es útil en su totalidad*)
 • Arreglos dentro de ⚙ Configurar
+16 de mayo de 2025 1.6
+• Ajustes visuales a interfaz
+• La animacion funciona esta vez
+• Texto a la derecha y la izquierda, ¡Como en una conversacion!
+• Rework del manejo de la respuesta en la interfaz
+• Ahora es posible añadir una categoría [consola e interfaz]
 ```
 
 ## Autores
