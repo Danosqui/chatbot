@@ -3,7 +3,9 @@
         "csv_directory": "CSVs",
         "default_similarity_threshold": 70,
         "save_unanswered_questions": true,
-        "unanswered_questions_file": "Preguntas sin poder responder.csv"
+        "unanswered_questions_file": "Preguntas sin poder responder.csv",
+        "help_file": "Ayuda.txt",
+        "info_file": "Info.txt"
     },
     "interface": {
         "default_mode": "oscuro",

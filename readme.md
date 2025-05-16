@@ -1,6 +1,4 @@
----
-
-# Chatbot (Versión de Desarrollo)
+# Chatbot
 
 Un bot creado por y para la Copa de Algoritmia de UADE.
 
@@ -9,14 +7,16 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
 - Responde preguntas basándose en los datos almacenados en archivos CSV.
 - Soporta múltiples categorías, cada una representada por un archivo CSV.
 - Si no encuentra una respuesta, guarda la pregunta en un archivo llamado `Preguntas sin poder responder.csv`. [configurable]
-- Responde rápidamente gracias a la integración artesanal propia para lematización y **RapidFuzz** para comparación de similitud.
-- Responde con ejemplos aleatorios si se consulta directamente el nombre de una categoría.
-- **Interfaz gráfica**:
-  - Incluye un modo claro, un modo oscuro y soporte para daltonismo (protanopia y deuteranopia).
-  - Permite interactuar con el chatbot de manera visual y amigable.
-  - Animación de carga (`"."`, `".."`, `"..."`) con un mensaje de "Cargando completado.". [configurable]
-  - Configuración dinámica de la interfaz mediante un archivo `config.json`.
-  - Procesamiento de preguntas y animación de carga en paralelo para mejorar la experiencia del usuario.
+- Comparación rápida de similitud con **RapidFuzz** y un sistema artesanal de lematización sin dependencias externas.
+- Permite respuestas aleatorias al consultar directamente por el nombre de una categoría.
+- Soporte para comandos en la línea de comandos (por ejemplo, `/salir`, `/cargar`, `/info`, etc.).
+- Posibilidad de cargar una pregunta previamente guardada (en GUI o terminal).
+- **Interfaz gráfica moderna con Flet**:
+  - Modo claro, oscuro y compatibilidad con protanopía y deuteranopía.
+  - Panel de configuración que permite ajustes en tiempo real.
+  - Animación de carga (`"."`, `".."`, `"..."`) personalizable.
+  - Procesamiento de preguntas y animación de carga en paralelo.
+  - Tiempo de respuesta mostrado en milisegundos.
 
 ## Requisitos
 
@@ -45,8 +45,11 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
    │   ├── programacion.csv
    │   ├── pokemon.csv
    │   └── Preguntas sin poder responder.csv
+   ├── .gitignore
+   ├── Ayuda.txt
    ├── chat.py
    ├── config.json
+   ├── Info.txt
    ├── interfaz.py
    ├── procesamiento_texto.py
    ├── readme.md
@@ -62,7 +65,9 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
     "csv_directory": "CSVs",
     "default_similarity_threshold": 70,
     "save_unanswered_questions": true,
-    "unanswered_questions_file": "Preguntas sin poder responder.csv"
+    "unanswered_questions_file": "Preguntas sin poder responder.csv",
+    "help_file": "Ayuda.txt",
+    "info_file": "Info.txt"
   },
   "interface": {
     "default_mode": "oscuro",
@@ -80,6 +85,8 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
 - **`default_similarity_threshold`**: Porcentaje (del 1 al 100) en el que considera el minimo de similitud para que sea considerada valida la respuesta.
 - **`save_unanswered_quiestions`**: Boolean para decidir si guardar el input ingresado por el usuario cuando no se le encuentra una respuesta acertada.
 - **`unanswered_questions_file`**: Nombre del archivo CSV en el cual se guardan los input ingresados por el usuario cuando no se le encuentra una respuesta acertada.
+- **`help_file`**: Ruta de archivo el cual acciona el comando /ayuda
+- **`info_file`**: Ruta de archivo el cual acciona el comando /info
 - **`default_mode`**: Modo predeterminado de la interfaz gráfica (`claro`, `oscuro`, `protanopia`, `deuteranopia`).
 - **`loading_delay`**: Tiempo (en segundos) entre los puntos de la animación (`"."`, `".."`, `"..."`).
 - **`loading_animation`**: Activa o desactiva la animación de carga.
@@ -134,9 +141,10 @@ programacion
 
 ## Documentación
 
-Consulta la documentación completa en el siguiente enlace:
+Consulta la documentación completa **en ingles** en el siguiente enlace y/o markdown:
 
-[Documentación](about:blank)
+[![ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Danosqui/chatbot)
+[Documentacion](https://deepwiki.com/Danosqui/chatbot)
 
 ## Changelog
 b indica que pertenece a la version Development de el proyecto
@@ -169,15 +177,17 @@ f indica que pertenece a la version Flet-Development de el proyecto
 • Modificaciones del readme.md acorde a cambios anteriores
 • "Centralizada" la lógica en chat.py
 • "Simplificado" interfaz.py
-```
-
-## Instalación alternativa con npm
-
-Si prefieres instalarlo con npm, sigue estos pasos:
-
-```bash
-npm i https://github.com/Danosqui/chatbot.git
-cd chatbot
+15 de mayo de 2025 1.4F
+• Fix de ⚙ Configurar [ahora abre y guarda exitosamente]
+• Ahora es posible cargar una pregunta desde la interfaz
+15 de mayo de 2025 1.5
+• Fix de ⚙ Configurar [ahora cierra sin guardar exitosamente]
+• Fix de cargar_pregunta
+• Ahora es posible cargar una pregunta desde la consola también
+• Ahora chat.py es utilizable (wow!) [python chat.py]
+• Utilización de comandos ("/salir", "/cargar" y "ayuda" "/info")
+• Creación de utilidades varias (ahora config.json realmente es útil en su totalidad*)
+• Arreglos dentro de ⚙ Configurar
 ```
 
 ## Autores
@@ -191,14 +201,13 @@ cd chatbot
 ---
 
 ### **Notas adicionales**
-- Esta es una **versión de desarrollo**, por lo que algunas características pueden estar incompletas o en progreso.
-- Documentación en proceso.
-- **Changelog se actualiza constantemente entre actualizaciones pero sus caracteristicas y demás no**
+- **SI ESTO SIGUE ACÁ ES POSIBLE QUE NO ESTÉ ACTUALIZADO AL 100% EL RESTO DE SECCIONES DEL README**
 ---
 
 ### TO-DO
-• ~~Arreglar el modal de configuracion de la interfaz~~
-• Que se puedan añadir preguntas desde el chat y la interfaz
-• que permita buscar preguntas específicas dentro de una categoría o en todas las categorías disponibles.
+- ~~Arreglar el modal de configuracion de la interfaz~~
+- ~~Que se puedan añadir preguntas desde el chat y la interfaz~~
+- Que permita buscar preguntas específicas dentro de una categoría o en todas las categorías disponibles.
+- Implementar nuevos tipos de archivos para leer
 
 ---

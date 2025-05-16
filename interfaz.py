@@ -2,9 +2,7 @@ import flet as ft
 import json
 import threading
 import time
-from chat import procesar_pregunta
-from chat import getCategorias
-from chat import cargarPregunta
+from chat import procesar_pregunta, procesar_comando_ayuda, procesar_comando_info, getCategorias, cargarPregunta
 
 # Cargar configuraciones desde config.json
 def cargar_config():
@@ -51,11 +49,7 @@ def guardar_config():
     with open("config.json", "w") as config_file:
         json.dump(config, config_file, indent=4)
 
-
-
 def main(page: ft.Page):
-
-
     aplicar_config()
     page.title = "Chatbot Flet UI"
     page.window_width, page.window_height = map(int, resolution.split("x"))
@@ -110,15 +104,24 @@ def main(page: ft.Page):
         page.update()
 
         def hilo_chat():
-            inicio = time.perf_counter()
-            respuesta, categoria, similitud, tiempo_ms = procesar_pregunta(pregunta, directorio_csv)
-            if loading_animation_enabled:
-                mostrar_cargando()
-            if respuesta:
-                mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms)
-            else:
-                salida_respuesta.value += f"\nChatbot: Lo siento, no entiendo tu pregunta. [{tiempo_ms} ms]\n"
+            if pregunta.startswith("/ayuda"):
+                respuesta = procesar_comando_ayuda()
+                salida_respuesta.value += f"\nChatbot: {respuesta}\n"
                 page.update()
+            elif pregunta.startswith("/info"):
+                respuesta = procesar_comando_info()
+                salida_respuesta.value += f"\nChatbot: {respuesta}\n"
+                page.update()
+            else:
+                inicio = time.perf_counter()
+                respuesta, categoria, similitud, tiempo_ms = procesar_pregunta(pregunta, directorio_csv)
+                if loading_animation_enabled:
+                    mostrar_cargando()
+                if respuesta:
+                    mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms)
+                else:
+                    salida_respuesta.value += f"\nChatbot: Lo siento, no entiendo tu pregunta. [{tiempo_ms} ms]\n"
+                    page.update()
 
             # Habilitar el campo de entrada y el botón de enviar nuevamente
             entrada_pregunta.disabled = False
@@ -137,46 +140,6 @@ def main(page: ft.Page):
         page.theme_mode = ft.ThemeMode.DARK if modo == "oscuro" else ft.ThemeMode.LIGHT
         page.update()
 
-
-    def abrirNuevaPregunta_modal(e):
-        
-        categorias = getCategorias(directorio_csv)
-        opcionesCat = []
-        for categoria in categorias:
-            opcionesCat.append(ft.dropdown.Option(categoria))
-
-        categoria = ft.Dropdown(label="Categoria",options=opcionesCat,width=400)
-        pregunta = ft.TextField(label="Pregunta", multiline=True)
-        respuesta = ft.TextField(label="Respuesta", multiline=True)
-
-        def guardar_datos(ev):
-            
-            cargarPregunta(directorio_csv,categoria.value,pregunta.value,respuesta.value)
-            dialog.open = False
-            page.update()
-
-        def cerrar_modal(ev):
-            dialog.open = False
-            page.update()
-
-        dialog = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Nueva pregunta"),
-            content=ft.Column(
-                controls=[categoria, pregunta, respuesta],
-                tight=True,
-            ),
-            actions=[
-                ft.TextButton("Guardar", on_click=guardar_datos),
-                ft.TextButton("Cerrar", on_click=cerrar_modal),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-
-        page.dialog = dialog
-        page.open(dialog)
-        page.update()
-
     def abrir_config_modal(e):
         campos = []
 
@@ -184,13 +147,15 @@ def main(page: ft.Page):
             try:
                 for campo in campos:
                     secciones = campo["key"].split(".")
-                    valor = campo["entrada"].value
+                    valor = campo["entrada"].value if isinstance(campo["entrada"], ft.TextField) else campo["entrada"].value
                     obj = config
                     for k in secciones[:-1]:
                         obj = obj[k]
                     clave_final = secciones[-1]
                     # Validar y convertir el valor ingresado
-                    if valor.lower() in ["true", "false"]:
+                    if isinstance(campo["entrada"], ft.Dropdown):
+                        obj[clave_final] = valor
+                    elif valor.lower() in ["true", "false"]:
                         obj[clave_final] = valor.lower() == "true"
                     elif valor.replace('.', '', 1).isdigit():
                         obj[clave_final] = float(valor) if '.' in valor else int(valor)
@@ -203,7 +168,6 @@ def main(page: ft.Page):
                 colores = MODOS[default_mode]
                 page.bgcolor = colores["bg"]
                 page.color = colores["fg"]
-                page.theme_mode = ft.ThemeMode.DARK if default_mode == "oscuro" else ft.ThemeMode.LIGHT
                 dlg.open = False
                 page.snack_bar = ft.SnackBar(ft.Text("Configuración guardada con éxito."), open=True)
                 page.update()
@@ -216,7 +180,25 @@ def main(page: ft.Page):
             if isinstance(datos, dict):
                 for clave, valor in datos.items():
                     key_path = f"{seccion}.{clave}"
-                    entrada = ft.TextField(label=key_path, value=str(valor))
+                    if isinstance(valor, bool):
+                        entrada = ft.Dropdown(
+                            label=key_path,
+                            value=str(valor).lower(),
+                            options=[
+                                ft.dropdown.Option("true"),
+                                ft.dropdown.Option("false"),
+                            ],
+                        )
+                    elif key_path == "interface.default_mode":
+                        entrada = ft.Dropdown(
+                            label=key_path,
+                            value=valor,
+                            options=[
+                                ft.dropdown.Option(modo) for modo in MODOS.keys()
+                            ],
+                        )
+                    else:
+                        entrada = ft.TextField(label=key_path, value=str(valor))
                     campos.append({"key": key_path, "entrada": entrada})
                     contenido.append(entrada)
 
@@ -226,10 +208,12 @@ def main(page: ft.Page):
             content=ft.Container(
                 content=ft.Column(contenido, scroll=ft.ScrollMode.ADAPTIVE),
                 padding=ft.padding.all(10),
+                width=600,  # Aumentar ancho del modal
+                height=500,  # Aumentar alto del modal
             ),
             actions=[
                 ft.TextButton("Guardar", on_click=guardar_nueva_config),
-                ft.TextButton("Cancelar", on_click=lambda e: setattr(dlg, "open", False))
+                ft.TextButton("Cancelar", on_click=lambda e: (setattr(dlg, "open", False), page.update())),
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
@@ -239,9 +223,65 @@ def main(page: ft.Page):
         page.open(dlg)
         page.update()
 
+    def abrir_cargar_pregunta_modal(e):
+        categorias = getCategorias(directorio_csv)
+        if not categorias:
+            page.snack_bar = ft.SnackBar(ft.Text("No hay categorías disponibles."), open=True)
+            page.update()
+            return
+
+        dropdown_categorias = ft.Dropdown(
+            label="Selecciona una categoría",
+            options=[ft.dropdown.Option(categoria) for categoria in categorias],
+        )
+        entrada_pregunta = ft.TextField(label="Escribe la pregunta")
+        entrada_respuesta = ft.TextField(label="Escribe la respuesta")
+
+        def guardar_pregunta(e):
+            categoria = dropdown_categorias.value
+            pregunta = entrada_pregunta.value.strip()
+            respuesta = entrada_respuesta.value.strip()
+
+            if not categoria or not pregunta or not respuesta:
+                page.snack_bar = ft.SnackBar(ft.Text("Todos los campos son obligatorios."), open=True)
+                page.update()
+                return
+
+            exito, mensaje = cargarPregunta(directorio_csv, categoria, pregunta, respuesta)
+            page.snack_bar = ft.SnackBar(ft.Text(mensaje), open=True)
+            if exito:
+                dlg.open = False
+            page.update()
+
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Cargar Pregunta"),
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        dropdown_categorias,
+                        entrada_pregunta,
+                        entrada_respuesta,
+                    ],
+                    scroll=ft.ScrollMode.ADAPTIVE,
+                ),
+                padding=ft.padding.all(10),
+                width=600,
+                height=400,
+            ),
+            actions=[
+                ft.TextButton("Guardar", on_click=guardar_pregunta),
+                ft.TextButton("Cancelar", on_click=lambda e: (setattr(dlg, "open", False), page.update())),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+
+        page.dialog = dlg
+        page.open(dlg)
+        page.update()
 
     boton_config = ft.ElevatedButton("⚙ Configurar", on_click=abrir_config_modal)
-    boton_newPregunta = ft.ElevatedButton("+ Nueva pregunta", on_click=abrirNuevaPregunta_modal)
+    boton_cargar_pregunta = ft.ElevatedButton("➕ Cargar Pregunta", on_click=abrir_cargar_pregunta_modal)
     botones_modo = ft.Row([
         ft.ElevatedButton("Claro", on_click=lambda e: cambiar_modo("claro")),
         ft.ElevatedButton("Oscuro", on_click=lambda e: cambiar_modo("oscuro")),
@@ -258,8 +298,7 @@ def main(page: ft.Page):
         salida_respuesta,
         ft.Divider(),
         botones_modo,
-        boton_config,
-        boton_newPregunta
+        ft.Row([boton_config, boton_cargar_pregunta], alignment=ft.MainAxisAlignment.CENTER),
     )
 
 ft.app(target=main)
