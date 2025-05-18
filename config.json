@@ -1,6 +1,6 @@
 {
     "chatbot": {
-        "csv_directory": "CSVs",
+        "csv_directory": "Data-Chatbot",
         "default_similarity_threshold": 70,
         "save_unanswered_questions": true,
         "unanswered_questions_file": "Preguntas sin poder responder.csv",

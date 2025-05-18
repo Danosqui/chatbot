@@ -38,10 +38,10 @@ Un bot creado por y para la Copa de Algoritmia de UADE.
    pip install flet rapidfuzz
    ```
 
-3. Asegúrate de que los archivos CSV estén en la carpeta `CSVs`. Ejemplo de estructura:
+3. Asegúrate de que los archivos CSV estén en la carpeta `Data-Chatbot`. Ejemplo de estructura:
    ```
    chatbot/
-   ├── CSVs/
+   ├── Data-Chatbot/
    │   ├── Archivos.json
    │   ├── Programacion.csv
    │   ├── Pokemon.csv
@@ -63,7 +63,7 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
 ```json
 {
   "chatbot": {
-    "csv_directory": "CSVs",
+    "csv_directory": "Data-Chatbot",
     "default_similarity_threshold": 70,
     "save_unanswered_questions": true,
     "unanswered_questions_file": "Preguntas sin poder responder.csv",
@@ -82,7 +82,7 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
 ```
 
 ### Opciones configurables:
-- **`csv_directory`**: Ruta de la carpeta donde se encuentran los CSVs.
+- **`csv_directory`**: Ruta de la carpeta donde se encuentran los Data-Chatbot.
 - **`default_similarity_threshold`**: Porcentaje (del 1 al 100) en el que considera el minimo de similitud para que sea considerada valida la respuesta.
 - **`save_unanswered_quiestions`**: Boolean para decidir si guardar el input ingresado por el usuario cuando no se le encuentra una respuesta acertada.
 - **`unanswered_questions_file`**: Nombre del archivo CSV en el cual se guardan los input ingresados por el usuario cuando no se le encuentra una respuesta acertada.
@@ -124,7 +124,7 @@ El archivo `config.json` permite personalizar el comportamiento del chatbot y la
    Chatbot (Programación): El módulo pandas permite trabajar con datos estructurados. (Similitud: 100.00%)
    ```
 
-3. Si el chatbot no reconoce una pregunta, la guardará en el archivo `Preguntas sin poder responder.csv` dentro de la carpeta `CSVs`.
+3. Si el chatbot no reconoce una pregunta, la guardará en el archivo `Preguntas sin poder responder.csv` dentro de la carpeta `Data-Chatbot`.
 
 ## Estructura de los archivos CSV
 
@@ -198,6 +198,9 @@ f indica que pertenece a la version Flet-Development de el proyecto
 16 de mayo de 2025 1.7
 • Arreglo en el nombre de categoria del json
 • Manejo de multiples lineas solucionado en interfaz
+18 de Mayo de 2025 1.8
+• Cambio de nombre de carpeta CSVs a Data-Chatbot
+• Mas información añadida a los archivos de informacion del chatbot
 ```
 
 ## Autores
