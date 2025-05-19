@@ -65,7 +65,7 @@ def cambiar_nombre_chatbot(nuevo_nombre):
 
 def main(page: ft.Page):
     aplicar_config()
-    page.title = "Chatbot Flet UI"
+    page.title = "Pokedexnou"
     page.window_width, page.window_height = map(int, resolution.split("x"))
     page.scroll = ft.ScrollMode.AUTO
 
