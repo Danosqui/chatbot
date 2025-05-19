@@ -201,6 +201,8 @@ f indica que pertenece a la version Flet-Development de el proyecto
 18 de Mayo de 2025 1.8
 • Cambio de nombre de carpeta CSVs a Data-Chatbot
 • Mas información añadida a los archivos de informacion del chatbot
+18 de mayo de 2025 1.9
+• Ahora se le puede modificar el nombre
 ```
 
 ## Autores

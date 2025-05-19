@@ -19,7 +19,7 @@ def cargar_config():
 config = cargar_config()
 
 def aplicar_config():
-    global directorio_csv, loading_delay, completion_delay, loading_animation_enabled, loading_cycles, resolution, default_mode
+    global directorio_csv, loading_delay, completion_delay, loading_animation_enabled, loading_cycles, resolution, default_mode, chatbot_name
     directorio_csv = config["chatbot"]["csv_directory"]
     loading_delay = config["interface"]["loading_delay"]
     completion_delay = config["interface"]["completion_delay"]
@@ -27,6 +27,7 @@ def aplicar_config():
     loading_cycles = config["interface"]["loading_cycles"]
     resolution = config["interface"]["resolution"]
     default_mode = config["interface"]["default_mode"]
+    chatbot_name = config["chatbot"]["chatbot_name"]
 
 aplicar_config()
 
@@ -56,6 +57,11 @@ MODOS = {
 def guardar_config():
     with open("config.json", "w") as config_file:
         json.dump(config, config_file, indent=4)
+
+def cambiar_nombre_chatbot(nuevo_nombre):
+    config["chatbot"]["chatbot_name"] = nuevo_nombre
+    guardar_config()
+    aplicar_config()
 
 def main(page: ft.Page):
     aplicar_config()
@@ -127,7 +133,7 @@ def main(page: ft.Page):
 
     def mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms):
         agregar_mensaje(
-            f"Chatbot ({categoria}): {respuesta} (Similitud: {similitud:.2f}%) [{tiempo_ms} ms]",
+            f"{chatbot_name} ({categoria}): {respuesta} (Similitud: {similitud:.2f}%) [{tiempo_ms} ms]",
             es_usuario=False
         )
 
@@ -139,12 +145,12 @@ def main(page: ft.Page):
             for puntos in [".", "..", "..."]:
                 if len(mensajes) > cargando_tag:
                     mensajes.pop()
-                mensajes.append((f"Chatbot: Cargando{puntos}", False))
+                mensajes.append((f"{chatbot_name}: Cargando{puntos}", False))
                 renderizar_mensajes()
                 time.sleep(loading_delay)
         if len(mensajes) > cargando_tag:
             mensajes.pop()
-        mensajes.append(("Chatbot: Cargando completado.", False))
+        mensajes.append((f"{chatbot_name}: Cargando completado.", False))
         renderizar_mensajes()
         time.sleep(completion_delay)
         if len(mensajes) > cargando_tag:

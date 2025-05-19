@@ -252,41 +252,72 @@ def guardar_pregunta_no_respondida(pregunta, directorio_csv, archivo):
 def procesar_pregunta(pregunta, directorio_csv, umbral=None):
     if umbral is None:
         umbral = config["chatbot"]["default_similarity_threshold"]
+    
+    # Comando para cargar datos
     if pregunta.startswith("/cargar"):
         return procesar_comando_cargar_interactivo(directorio_csv), None, 100, 0
+    
+    # Comando de ayuda
     elif pregunta.startswith("/ayuda"):
         return procesar_comando_ayuda(), None, 100, 0
+    
+    # Comando de información
     elif pregunta.startswith("/info"):
         return procesar_comando_info(), None, 100, 0
+    
+    # Comando para cambiar categoría
     elif pregunta.lower().startswith("/categoria"):
         return procesar_comando_categoria_interactivo(directorio_csv), None, 100, 0
+    
+    # Comando para cambiar el nombre del chatbot
+    elif pregunta.lower().startswith("/name"):
+        partes = pregunta.split(maxsplit=1)
+        if len(partes) > 1:
+            nuevo_nombre = partes[1].strip()
+            config["chatbot"]["chatbot_name"] = nuevo_nombre
+            with open("config.json", "w") as config_file:
+                json.dump(config, config_file, indent=4)
+                
+                #Estas dos cosas de acá es para que se actualice el nombre cuando ya esta ejecutandose
+                global chatbot_name
+                chatbot_name = nuevo_nombre
+            return f"El nombre del chatbot ha sido cambiado a '{nuevo_nombre}'.", None, 100, 0
+        else:
+            return "Uso: /name {nuevo nombre}", None, 100, 0
+    
+    # Procesar pregunta normal
     datos = cargar_datos_csv(directorio_csv)
     inicio = time.perf_counter()
     respuesta, categoria, similitud = buscar_pregunta_mas_similar(pregunta, datos, umbral)
     fin = time.perf_counter()
     tiempo_ms = int((fin - inicio) * 1000)
+    
+    # Guardar preguntas no respondidas
     if respuesta is None:
         guardar_pregunta_no_respondida(pregunta, directorio_csv, config["chatbot"]["unanswered_questions_file"])
+    
     return respuesta, categoria, similitud, tiempo_ms
 
 if __name__ == "__main__":
     directorio_csv = config["chatbot"]["csv_directory"]
     umbral_similitud = config["chatbot"]["default_similarity_threshold"]
-    print("Chatbot iniciado. Escribe '/salir' para terminar.")
+    chatbot_name = config["chatbot"]["chatbot_name"]  # Obtener el nombre del chatbot desde la configuración
+
+    print(f"{chatbot_name} iniciado. Escribe '/salir' para terminar.")
     while True:
         entrada = input("Tú: ")
         if entrada.lower() == "/salir":
-            print("Chatbot terminado.")
+            print(f"{chatbot_name} terminado.")
             break
         elif entrada.startswith("/cargar"):
             mensaje = procesar_comando_cargar_interactivo(directorio_csv)
-            print(f"Chatbot: {mensaje}")
+            print(f"{chatbot_name}: {mensaje}")
         elif entrada.lower().startswith("/categoria"):
             mensaje = procesar_comando_categoria_interactivo(directorio_csv)
-            print(f"Chatbot: {mensaje}")
+            print(f"{chatbot_name}: {mensaje}")
         else:
             respuesta, categoria, similitud, tiempo = procesar_pregunta(entrada, directorio_csv, umbral_similitud)
             if respuesta:
-                print(f"Chatbot ({categoria}, {similitud}%): {respuesta}")
+                print(f"{chatbot_name} ({categoria}, {similitud}%): {respuesta}")
             else:
-                print("Chatbot: No tengo una respuesta para eso.")
+                print(f"{chatbot_name}: No tengo una respuesta para eso.")
