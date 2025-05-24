@@ -2,6 +2,7 @@ import flet as ft
 import json
 import threading
 import time
+import datetime
 import os
 from chat import (
     procesar_pregunta,
@@ -127,8 +128,15 @@ def main(page: ft.Page):
             )
         page.update()
 
+    def log_mensaje(mensaje):
+
+        with open((directorio_csv + "/logs.txt"),"a", encoding="utf-8") as archivo:
+            ahora = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            archivo.write("\n("+ahora+ ") "+ mensaje)
+
     def agregar_mensaje(texto, es_usuario=False):
         mensajes.append((texto, es_usuario))
+        log_mensaje(texto)
         renderizar_mensajes()
 
     def mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms):
