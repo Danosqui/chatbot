@@ -141,7 +141,7 @@ def main(page: ft.Page):
 
     def mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms):
         agregar_mensaje(
-            f"{chatbot_name} ({categoria}): {respuesta} (Similitud: {similitud:.2f}%) [{tiempo_ms} ms]",
+            f"{chatbot_name}: {respuesta} (Similitud: {similitud:.2f}%) [{tiempo_ms} ms]", # !!! de aca saque el (categoria) porque la verdad no importa mucho al usuario
             es_usuario=False
         )
 
@@ -200,7 +200,7 @@ def main(page: ft.Page):
                 if respuesta:
                     mostrar_respuesta(respuesta, categoria, similitud, tiempo_ms)
                 else:
-                    agregar_mensaje(f"Chatbot: Lo siento, no entiendo tu pregunta. [{tiempo_ms} ms]", es_usuario=False)
+                    agregar_mensaje(f"Chatbot: Lo siento, no entiendo tu pregunta. Si quieres añadirla a la lista de preguntas, haz click en '+ Cargar Pregunta' [{tiempo_ms} ms]", es_usuario=False) 
             entrada_pregunta.disabled = False
             boton_enviar.disabled = False
             page.update()
